@@ -1,0 +1,29 @@
+[
+  {
+    "name": "Samruddhi Shelake",
+    "email": "prathameshmane1515@gmail.com",
+    "body": "Hey How are ou doing?",
+    "id": "dddb7703-6e65-4cb8-a3bf-3f3e47f0b286",
+    "receivedAt": "2026-11-19T09:04:56.853Z",
+    "status": "read",
+    "ownerNotified": false,
+    "senderAcknowledged": false,
+    "replies": []
+  },
+  {
+    "name": "Shubham Kale",
+    "email": "prathameshmane1515@gmail.com",
+    "body": "This is from shubham",
+    "id": "13fcf105-44c5-42c6-ae2a-2dec873cc663",
+    "receivedAt": "2026-11-19T09:24:42.356Z",
+    "status": "replied",
+    "ownerNotified": true,
+    "senderAcknowledged": true,
+    "replies": [
+      {
+        "body": "Thank you shubham for connecting me",
+        "sentAt": "2026-11-19T09:27:42.151Z"
+      }
+    ]
+  }
+]

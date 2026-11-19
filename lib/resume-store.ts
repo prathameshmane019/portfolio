@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { unlink } from "node:fs/promises";
+import { Binary } from "mongodb";
 import { getMongoDatabase, isMongoConfigured } from "@/lib/mongodb";
 
 export const MAX_RESUME_BYTES = 10 * 1024 * 1024;
@@ -15,9 +16,10 @@ export function isPdf(buffer: Buffer) {
 export async function readResumeAsset() {
   if (isMongoConfigured()) {
     const asset = await (await getMongoDatabase())
-      .collection<{ _id: string; data: Uint8Array; updatedAt?: Date }>("portfolio_assets")
+      .collection<{ _id: string; data: Binary | Uint8Array; updatedAt?: Date }>("portfolio_assets")
       .findOne({ _id: "resume" });
-    return asset ? Buffer.from(asset.data) : null;
+    if (!asset) return null;
+    return Buffer.from(asset.data instanceof Binary ? asset.data.value() : asset.data);
   }
 
   try {

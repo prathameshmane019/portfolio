@@ -361,8 +361,6 @@ textarea:focus-visible,
 .entry-label,
 .project-index,
 .timeline-meta,
-.portrait-note,
-.portrait-code,
 .case-file-meta,
 .case-file-action,
 .visual-caption,
@@ -499,57 +497,164 @@ textarea:focus-visible,
 .portrait-frame {
   position: relative;
   width: 100%;
-  max-width: 440px;
-  aspect-ratio: 0.87;
+  max-width: 400px;
+  justify-self: center;
+  aspect-ratio: 1.24;
   overflow: hidden;
   border: 1px solid var(--ink);
-  background: var(--signal);
+  background: #f5f2ea;
 }
 
-.portrait-halftone {
+.workspace-graphic {
   position: absolute;
   inset: 0;
-  display: grid;
-  overflow: hidden;
-  place-items: center;
-  background-image: radial-gradient(var(--ink) 0.7px, transparent 0.8px);
-  background-position: center;
-  background-size: 5px 5px;
-  mix-blend-mode: multiply;
+  cursor: crosshair;
+  outline-offset: 3px;
 }
 
-.portrait-halftone::before {
-  position: absolute;
-  inset: 8%;
-  border: 1px solid rgba(17, 17, 16, 0.7);
-  content: "";
+.workspace-graphic svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-.portrait-halftone > span {
-  color: var(--paper);
-  font-size: clamp(80px, 17vw, 190px);
-  font-weight: 800;
-  letter-spacing: -0.12em;
-  mix-blend-mode: difference;
+.workspace-bus {
+  fill: none;
+  stroke-dasharray: 6 10;
+  animation: workspace-packet var(--workspace-bus-duration, 1.8s) linear infinite;
 }
 
-.portrait-note,
-.portrait-code {
-  position: absolute;
-  z-index: 1;
-  padding: 6px 8px;
-  background: var(--paper);
-  font-size: 8px;
+.workspace-ide {
+  animation: workspace-float-ide 7.6s ease-in-out infinite;
 }
 
-.portrait-note {
-  bottom: 13px;
-  left: 13px;
+.workspace-shell {
+  animation: workspace-float-shell 8.8s ease-in-out infinite;
 }
 
-.portrait-code {
-  top: 13px;
-  right: 13px;
+.workspace-ui {
+  animation: workspace-float-ui 6.9s ease-in-out infinite;
+}
+
+.workspace-blink {
+  animation: workspace-cursor-blink 1s steps(1, end) infinite;
+}
+
+.workspace-diff-step {
+  animation: workspace-diff-step 6.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.workspace-token-a {
+  animation: workspace-token-slide-a 5.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.workspace-token-b {
+  animation: workspace-token-slide-b 6.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.workspace-db-pulse,
+.workspace-commit-pulse {
+  animation: workspace-node-pulse 3.6s ease-in-out infinite;
+  fill: #f5f2ea;
+}
+
+.workspace-commit-pulse {
+  animation-duration: 4.2s;
+}
+
+.workspace-knob {
+  animation: workspace-toggle-knob 4.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.workspace-spark {
+  animation: workspace-spark-scroll 2.8s linear infinite;
+}
+
+.workspace-build-fill {
+  transform-box: fill-box;
+  transform-origin: left;
+  animation: workspace-build-bar 4.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+@keyframes workspace-float-ide {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes workspace-float-shell {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+
+@keyframes workspace-float-ui {
+  0%, 100% { transform: translate(0); }
+  50% { transform: translate(4px, -4px); }
+}
+
+@keyframes workspace-cursor-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes workspace-diff-step {
+  0%, 14%, 90%, 100% { transform: translateY(0); }
+  18%, 32% { transform: translateY(15px); }
+  36%, 50% { transform: translateY(30px); }
+  54%, 68% { transform: translateY(45px); }
+  72%, 86% { transform: translateY(60px); }
+}
+
+@keyframes workspace-token-slide-a {
+  0%, 100% { transform: translateX(0); }
+  45%, 55% { transform: translateX(9px); }
+}
+
+@keyframes workspace-token-slide-b {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-7px); }
+}
+
+@keyframes workspace-packet {
+  to { stroke-dashoffset: -48; }
+}
+
+@keyframes workspace-node-pulse {
+  0%, 30%, 100% { fill: #f5f2ea; }
+  45%, 75% { fill: #e87524; }
+}
+
+@keyframes workspace-toggle-knob {
+  0%, 44%, 100% { transform: translateX(0); }
+  52%, 94% { transform: translateX(12px); }
+}
+
+@keyframes workspace-spark-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-48px); }
+}
+
+@keyframes workspace-build-bar {
+  0%, 15% { transform: scaleX(.28); }
+  45%, 75% { transform: scaleX(.84); }
+  88%, 100% { transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-ide,
+  .workspace-shell,
+  .workspace-ui,
+  .workspace-blink,
+  .workspace-diff-step,
+  .workspace-token-a,
+  .workspace-token-b,
+  .workspace-bus,
+  .workspace-db-pulse,
+  .workspace-commit-pulse,
+  .workspace-knob,
+  .workspace-spark,
+  .workspace-build-fill {
+    animation: none !important;
+  }
 }
 
 .crosshair {
@@ -558,11 +663,6 @@ textarea:focus-visible,
   color: var(--signal);
   font-family: var(--mono);
   font-size: 17px;
-}
-
-.portrait-cross {
-  top: -9px;
-  left: -7px;
 }
 
 .about-copy h2,
@@ -2164,12 +2264,8 @@ body:has([data-cursor]:hover) .cursor-label {
   }
 
   .portrait-frame {
-    max-width: 330px;
-    aspect-ratio: 1.1;
-  }
-
-  .portrait-halftone > span {
-    font-size: 125px;
+    max-width: min(100%, 360px);
+    aspect-ratio: 1.24;
   }
 
   .about-copy h2,

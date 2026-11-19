@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_COOKIE, hasValidOrigin, isValidAdminSession } from "@/lib/admin-auth";
 import { parsePortfolioContent, readPortfolioContent, writePortfolioContent } from "@/lib/content-store";
+import { isPersistentStoreRequiredButMissing, MONGODB_SETUP_MESSAGE } from "@/lib/mongodb";
 import {
   isPdf,
   MAX_BACKUP_BYTES,
@@ -19,6 +20,9 @@ function authorized(request: NextRequest) {
 export async function GET(request: NextRequest) {
   if (!authorized(request)) {
     return NextResponse.json({ error: "Sign in to download a backup." }, { status: 401 });
+  }
+  if (isPersistentStoreRequiredButMissing()) {
+    return NextResponse.json({ error: MONGODB_SETUP_MESSAGE }, { status: 503 });
   }
   try {
     const backup = {
@@ -46,6 +50,9 @@ export async function POST(request: NextRequest) {
   }
   if (!hasValidOrigin(request)) {
     return NextResponse.json({ error: "Request origin is not allowed." }, { status: 403 });
+  }
+  if (isPersistentStoreRequiredButMissing()) {
+    return NextResponse.json({ error: MONGODB_SETUP_MESSAGE }, { status: 503 });
   }
   const length = Number(request.headers.get("content-length") || 0);
   if (length > MAX_BACKUP_BYTES) {

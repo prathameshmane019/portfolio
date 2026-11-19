@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_COOKIE, hasValidOrigin, isValidAdminSession } from "@/lib/admin-auth";
 import { readPortfolioContent, writePortfolioContent } from "@/lib/content-store";
 import { isPdf, MAX_RESUME_BYTES, writeResumeAsset } from "@/lib/resume-store";
+import { isPersistentStoreRequiredButMissing, MONGODB_SETUP_MESSAGE } from "@/lib/mongodb";
 
 export const runtime = "nodejs";
 
@@ -12,6 +13,9 @@ function authorized(request: NextRequest) {
 export async function POST(request: NextRequest) {
   if (!authorized(request)) {
     return NextResponse.json({ error: "Sign in to upload a résumé." }, { status: 401 });
+  }
+  if (isPersistentStoreRequiredButMissing()) {
+    return NextResponse.json({ error: MONGODB_SETUP_MESSAGE }, { status: 503 });
   }
   if (!hasValidOrigin(request)) {
     return NextResponse.json({ error: "Request origin is not allowed." }, { status: 403 });

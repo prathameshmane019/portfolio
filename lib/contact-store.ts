@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { getMongoDatabase, isMongoConfigured } from "@/lib/mongodb";
 
 export type ContactReply = {
   body: string;
@@ -76,13 +77,21 @@ function serializeWrite<T>(operation: () => Promise<T>): Promise<T> {
 }
 
 export async function listContactMessages() {
+  if (isMongoConfigured()) {
+    const messages = await (await getMongoDatabase())
+      .collection<ContactMessage>("contact_messages")
+      .find({}, { projection: { _id: 0, revision: 0 } })
+      .sort({ receivedAt: -1 })
+      .toArray();
+    return messages;
+  }
+
   const messages = await readFileMessages();
   return messages.sort((left, right) => right.receivedAt.localeCompare(left.receivedAt));
 }
 
 export function saveContactMessage(input: Pick<ContactMessage, "name" | "email" | "body">) {
   return serializeWrite(async () => {
-    const messages = await readFileMessages();
     const message: ContactMessage = {
       ...input,
       id: randomUUID(),
@@ -92,6 +101,14 @@ export function saveContactMessage(input: Pick<ContactMessage, "name" | "email" 
       senderAcknowledged: false,
       replies: [],
     };
+    if (isMongoConfigured()) {
+      await (await getMongoDatabase())
+        .collection<ContactMessage & { revision: number }>("contact_messages")
+        .insertOne({ ...message, revision: 0 });
+      return message;
+    }
+
+    const messages = await readFileMessages();
     messages.push(message);
     await writeFileMessages(messages);
     return message;
@@ -103,6 +120,22 @@ export function updateContactMessage(
   update: (message: ContactMessage) => ContactMessage,
 ) {
   return serializeWrite(async () => {
+    if (isMongoConfigured()) {
+      const collection = (await getMongoDatabase()).collection<ContactMessage & { revision: number }>("contact_messages");
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const current = await collection.findOne({ id });
+        if (!current) return null;
+        const { revision, ...currentMessage } = current;
+        const updated = update(currentMessage);
+        const result = await collection.updateOne(
+          { id, revision },
+          { $set: { ...updated, revision: revision + 1 } },
+        );
+        if (result.modifiedCount === 1) return updated;
+      }
+      throw new Error("Contact message changed repeatedly while saving its update.");
+    }
+
     const messages = await readFileMessages();
     const index = messages.findIndex((message) => message.id === id);
     if (index < 0) return null;

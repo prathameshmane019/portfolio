@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_COOKIE, hasValidOrigin, isValidAdminSession } from "@/lib/admin-auth";
 import { listContactMessages, updateContactMessage } from "@/lib/contact-store";
+import { isPersistentStoreRequiredButMissing, MONGODB_SETUP_MESSAGE } from "@/lib/mongodb";
 
 export const runtime = "nodejs";
 
@@ -11,6 +12,9 @@ function authorized(request: NextRequest) {
 export async function GET(request: NextRequest) {
   if (!authorized(request)) {
     return NextResponse.json({ error: "Sign in to view messages." }, { status: 401 });
+  }
+  if (isPersistentStoreRequiredButMissing()) {
+    return NextResponse.json({ error: MONGODB_SETUP_MESSAGE }, { status: 503 });
   }
   try {
     return NextResponse.json({ messages: await listContactMessages() }, {
@@ -28,6 +32,9 @@ export async function PATCH(request: NextRequest) {
   }
   if (!hasValidOrigin(request)) {
     return NextResponse.json({ error: "Request origin is not allowed." }, { status: 403 });
+  }
+  if (isPersistentStoreRequiredButMissing()) {
+    return NextResponse.json({ error: MONGODB_SETUP_MESSAGE }, { status: 503 });
   }
 
   let body: unknown;

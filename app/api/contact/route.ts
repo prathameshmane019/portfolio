@@ -9,6 +9,7 @@ import {
   updateContactMessage,
   type ContactMessage,
 } from "@/lib/contact-store";
+import { isPersistentStoreRequiredButMissing, MONGODB_SETUP_MESSAGE } from "@/lib/mongodb";
 
 export const runtime = "nodejs";
 
@@ -37,6 +38,9 @@ function isValidEmail(email: string) {
 }
 
 export async function POST(request: NextRequest) {
+  if (isPersistentStoreRequiredButMissing()) {
+    return NextResponse.json({ error: MONGODB_SETUP_MESSAGE }, { status: 503 });
+  }
   const contentLength = Number(request.headers.get("content-length") || 0);
   if (contentLength > 16_384) {
     return NextResponse.json({ error: "Request is too large." }, { status: 413 });

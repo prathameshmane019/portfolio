@@ -3,6 +3,7 @@ import { ADMIN_COOKIE, hasValidOrigin, isValidAdminSession } from "@/lib/admin-a
 import { sendAdminReply } from "@/lib/contact-mailer";
 import { listContactMessages, updateContactMessage, type ContactMessage } from "@/lib/contact-store";
 import { readPortfolioContent } from "@/lib/content-store";
+import { isPersistentStoreRequiredButMissing, MONGODB_SETUP_MESSAGE } from "@/lib/mongodb";
 
 export const runtime = "nodejs";
 
@@ -19,6 +20,9 @@ function isSmtpAuthenticationFailure(error: unknown) {
 export async function POST(request: NextRequest, context: RouteContext) {
   if (!authorized(request)) {
     return NextResponse.json({ error: "Sign in to reply to messages." }, { status: 401 });
+  }
+  if (isPersistentStoreRequiredButMissing()) {
+    return NextResponse.json({ error: MONGODB_SETUP_MESSAGE }, { status: 503 });
   }
   if (!hasValidOrigin(request)) {
     return NextResponse.json({ error: "Request origin is not allowed." }, { status: 403 });

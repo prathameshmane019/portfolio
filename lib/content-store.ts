@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { getMongoDatabase, isMongoConfigured } from "@/lib/mongodb";
 import { projects, type Project } from "@/data/projects";
 import { achievements, education, experience, profile, skillGroups, stats } from "@/data/site";
 
@@ -99,6 +100,16 @@ export function parsePortfolioContent(value: unknown): PortfolioContent | null {
 }
 
 export async function readPortfolioContent(): Promise<PortfolioContent> {
+  if (isMongoConfigured()) {
+    const saved = await (await getMongoDatabase())
+      .collection<{ _id: string; content: unknown }>("portfolio_content")
+      .findOne({ _id: "main" });
+    if (!saved) return initialContent;
+    const content = parsePortfolioContent(saved.content);
+    if (!content) throw new Error("Portfolio content in MongoDB does not match the expected schema.");
+    return content;
+  }
+
   try {
     const saved = await readFile(contentPath(), "utf8");
     const parsed: unknown = JSON.parse(saved);
@@ -114,6 +125,17 @@ export async function readPortfolioContent(): Promise<PortfolioContent> {
 export async function writePortfolioContent(value: unknown): Promise<PortfolioContent> {
   const content = parsePortfolioContent(value);
   if (!content) throw new Error("Portfolio content is invalid.");
+
+  if (isMongoConfigured()) {
+    await (await getMongoDatabase())
+      .collection<{ _id: string; content: PortfolioContent; updatedAt: Date }>("portfolio_content")
+      .replaceOne(
+      { _id: "main" },
+      { content, updatedAt: new Date() },
+      { upsert: true },
+    );
+    return content;
+  }
 
   const destination = contentPath();
   const directory = path.dirname(destination);

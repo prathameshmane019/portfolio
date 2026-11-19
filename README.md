@@ -52,17 +52,37 @@ dropping or selecting a PDF (up to 10 MB). Use **Save changes** or `Ctrl+S` to
 publish content edits. Admin routes are excluded from search indexing and protected by
 an HTTP-only, strict same-site session cookie.
 
-Content is stored in `data/content.json` by default; the résumé upload updates
-the public `/api/resume` download. `PORTFOLIO_RESUME_FILE` can point to an
-absolute persistent path; otherwise the PDF is stored at `public/resume.pdf`.
-Back up both regularly and download an additional full backup from the
-dashboard (which includes the PDF). This filesystem store is
-intended for a single writable Node.js server. It is not durable on serverless
-or ephemeral hosts such as Vercel: changes may fail or disappear after a
-deployment/restart. Use a persistent volume or move the content store and file
-uploads and contact inbox to managed storage before using the admin editor on
-such a host. Contact messages are stored separately and are not included in
-portfolio content backups; protect and back up `data/messages.json` separately.
+For local development without MongoDB, content is stored in
+`data/content.json`, messages in `data/messages.json`, and the résumé PDF at
+`public/resume.pdf`; the `PORTFOLIO_*_FILE` variables can override those paths.
+When `MONGODB_URI` is configured, MongoDB Atlas stores editable portfolio
+content, contact messages, and the résumé PDF. MongoDB storage takes precedence
+over the local JSON/filesystem store. Without it, filesystem storage is for
+local development or a single writable Node.js server only; it is not durable
+on Vercel. Vercel API routes return a configuration error instead of pretending
+to save to its temporary filesystem when MongoDB is missing.
+
+### Configure MongoDB Atlas for Vercel
+
+1. Create an Atlas cluster and a database user with a strong unique password.
+   Grant only `readWrite` access to the portfolio database.
+2. Configure Atlas Network Access for your Vercel deployment. Prefer Vercel
+   Secure Compute/static egress where available; if using a broad IP rule,
+   restrict the database user to this app and use a strong password.
+3. Copy the Atlas driver connection string into `MONGODB_URI` and set
+   `MONGODB_DB=portfolio` (or your chosen database name) in Vercel's project
+   environment variables. Add them to every deployment environment that needs
+   admin access, then redeploy.
+4. For local development with Atlas, put the same values in the untracked
+   `.env.local` file. Do not commit the connection string.
+5. After deployment, sign in to `/admin`; if you have an existing JSON backup,
+   restore it from **Restore** to seed the Atlas content and résumé. Export a
+   fresh backup after migration. Contact messages are not included in content
+   backups and must be retained separately.
+
+MongoDB stores the résumé as binary data in a separate asset document; the
+current 10 MB upload limit is within MongoDB's document size limit. Back up
+your Atlas database as well as downloading portfolio backups regularly.
 
 ### Required credentials
 
@@ -114,6 +134,6 @@ the terminal easter egg (`help`, `about`, `projects`, `skills`, `contact`,
 `theme`). The mobile navigation is expandable and marks the active section.
 Reduce-motion preferences bypass the preloader and role scrambler.
 
-Set the environment variables above in the Node.js host. The portfolio can be
-deployed to Vercel for read-only use, but persistent admin content editing
-requires a database adapter or a separate writable host.
+Set the environment variables above in the Node.js host. On Vercel, configure
+MongoDB Atlas using the steps above to enable persistent admin editing, contact
+inbox storage, and résumé uploads.

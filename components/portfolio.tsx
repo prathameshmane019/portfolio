@@ -11,6 +11,7 @@ import {
 } from "react";
 import type { Project } from "@/data/projects";
 import type { PortfolioContent } from "@/lib/content-store";
+import EditorialWorkspaceGraphic from "@/components/editorial-workspace-graphic";
 
 const navigation = [
   ["02", "About", "#about"],
@@ -675,11 +676,8 @@ export function Portfolio({ content }: { content: PortfolioContent }) {
           <div className="page-shell">
             <EntryLabel number="02">ABOUT / THE OPERATOR</EntryLabel>
             <div className="about-layout">
-              <div className="portrait-frame" role="img" aria-label="Profile photograph placeholder">
-                <div className="portrait-halftone"><span>PM</span></div>
-                <span className="portrait-note">[TODO: PHOTO]</span>
-                <span className="portrait-code">PM—001 / FIG. A</span>
-                <span className="crosshair portrait-cross">+</span>
+              <div className="portrait-frame">
+                <EditorialWorkspaceGraphic />
               </div>
               <div className="about-copy">
                 <h2>Full stack developer.<br /><em>End to end.</em></h2>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   FormEvent,
   KeyboardEvent,
@@ -112,6 +113,8 @@ function ProjectVisual({ project }: { project: Project }) {
           <div className="redaction-bars"><b /><b /><b /></div>
           <small>DETAILS LIMITED</small>
         </div>
+      ) : project.coverImage ? (
+        <Image className="case-visual-image" src={project.coverImage} alt="" width={1200} height={800} unoptimized />
       ) : (
         <div className="case-screen">
           <div className="case-screen-head">
@@ -129,7 +132,9 @@ function ProjectVisual({ project }: { project: Project }) {
       <span className="visual-caption">
         {project.confidential
           ? "CLIENT VISUAL / DETAILS LIMITED"
-          : `FIG. ${project.number} — [TODO: real screenshots]`}
+          : project.coverImage
+            ? `FIG. ${project.number} — PROJECT COVER`
+            : `FIG. ${project.number} — PROJECT VISUAL`}
       </span>
       <span className="crosshair crosshair-top">+</span>
       <span className="crosshair crosshair-bottom">+</span>

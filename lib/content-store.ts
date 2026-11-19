@@ -89,7 +89,9 @@ function validateContent(value: unknown): value is PortfolioContent {
       isStringArray(item.features) && isStringArray(item.stack) && isStringArray(item.contribution) &&
       (item.confidential === undefined || typeof item.confidential === "boolean") &&
       (item.live === undefined || typeof item.live === "string") &&
-      (item.github === undefined || typeof item.github === "string")) &&
+      (item.github === undefined || typeof item.github === "string") &&
+      (item.coverImage === undefined || typeof item.coverImage === "string") &&
+      (item.screenshots === undefined || isStringArray(item.screenshots))) &&
     new Set((work as { slug: string }[]).map((item) => item.slug)).size === work.length &&
     (work as { slug: string }[]).every((item) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug));
 }

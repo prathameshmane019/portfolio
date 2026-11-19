@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Project } from "@/data/projects";
@@ -24,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function CaseImage({ project, label }: { project: Project; label: string }) {
+function CaseImage({ project, label, imageUrl }: { project: Project; label: string; imageUrl?: string }) {
   return (
     <figure className={`detail-image ${project.confidential ? "detail-redacted" : ""}`}>
       {project.confidential ? (
@@ -35,6 +36,8 @@ function CaseImage({ project, label }: { project: Project; label: string }) {
           <div className="redaction-bars"><b /><b /><b /></div>
           <small>DETAILS LIMITED</small>
         </div>
+      ) : imageUrl ? (
+        <Image className="detail-project-image" src={imageUrl} alt={`${project.shortTitle} — ${label.toLowerCase()}`} width={1600} height={1000} unoptimized />
       ) : (
         <div className="detail-screen">
           <div className="detail-screen-top"><span>PM / PROJECT LOG</span><span>{project.shortTitle}</span></div>
@@ -44,7 +47,7 @@ function CaseImage({ project, label }: { project: Project; label: string }) {
           </div>
         </div>
       )}
-      <figcaption>{label} — {project.confidential ? "REDACTED VISUAL" : "[TODO: real screenshots]"}</figcaption>
+      <figcaption>{label} — {project.confidential ? "REDACTED VISUAL" : imageUrl ? "PROJECT IMAGE" : "PROJECT VISUAL"}</figcaption>
       <span className="detail-image-cross">+</span>
     </figure>
   );
@@ -85,7 +88,7 @@ export default async function ProjectPage({ params }: Props) {
           </div>
         </header>
 
-        <CaseImage project={project} label="FIG. 01" />
+        <CaseImage project={project} label="FIG. 01" imageUrl={project.coverImage} />
 
         <section className="detail-story">
           <div className="detail-story-label">01 / THE PROBLEM</div>
@@ -103,7 +106,6 @@ export default async function ProjectPage({ params }: Props) {
             <ul>{project.features.map((feature) => <li key={feature}>{feature}</li>)}</ul>
           </div>
         </section>
-        <CaseImage project={project} label="FIG. 02" />
         <section className="detail-story">
           <div className="detail-story-label">03 / THE ROLE</div>
           <div className="detail-story-copy">
@@ -122,11 +124,14 @@ export default async function ProjectPage({ params }: Props) {
           </div>
         </section>
 
-        <div className="detail-gallery">
-          <span>SCREENSHOT ARCHIVE / [TODO: real screenshots]</span>
-          <CaseImage project={project} label="FIG. 03" />
-          <CaseImage project={project} label="FIG. 04" />
-        </div>
+        {project.screenshots && project.screenshots.length > 0 && (
+          <div className="detail-gallery">
+            <span>PROJECT SCREENSHOTS / {project.screenshots.length.toString().padStart(2, "0")} IMAGES</span>
+            {project.screenshots.map((imageUrl, imageIndex) => (
+              <CaseImage project={project} key={imageUrl} imageUrl={imageUrl} label={`FIG. ${String(imageIndex + 2).padStart(2, "0")}`} />
+            ))}
+          </div>
+        )}
 
         <Link className="next-case" href={`/projects/${nextProject.slug}`}>
           <span>NEXT CASE FILE / {nextProject.number}</span>

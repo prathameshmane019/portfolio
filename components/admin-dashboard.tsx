@@ -4,6 +4,7 @@ import { ChangeEvent, DragEvent, FormEvent, KeyboardEvent as ReactKeyboardEvent,
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { PortfolioContent } from "@/lib/content-store";
+import AdminProjectMedia from "@/components/admin-project-media";
 
 type SectionKey = "profile" | "projects" | "experience" | "skillGroups" | "education" | "achievements" | "stats" | "messages";
 type JsonRecord = Record<string, unknown>;
@@ -163,6 +164,8 @@ function newItemFor(label: string): unknown {
       learned: "",
       confidential: false,
       visual: "project-web",
+      coverImage: "",
+      screenshots: [],
     },
     Experience: { type: "work", title: "", organization: "", date: "", details: [] },
     Skills: { name: "", number: "", skills: [] },
@@ -322,7 +325,9 @@ function JsonField({
   if (isRecord(value)) {
     return (
       <div className={`admin-object${depth ? " admin-object-nested" : ""}`}>
-        {Object.entries(value).map(([key, child]) => (
+        {Object.entries(value)
+          .filter(([key]) => label !== "Projects" || (key !== "coverImage" && key !== "screenshots"))
+          .map(([key, child]) => (
           <JsonField
             key={key}
             label={key}
@@ -439,6 +444,12 @@ export default function AdminDashboard() {
     setContent((current) => current ? { ...current, [key]: value } as PortfolioContent : current);
     setError("");
     setMessage("");
+  }
+
+  function updateAfterProjectMedia(contentFromServer: PortfolioContent) {
+    setContent(contentFromServer);
+    setSavedSnapshot(JSON.stringify(contentFromServer));
+    setError("");
   }
 
   function selectSection(section: SectionKey | "overview") {
@@ -842,6 +853,13 @@ export default function AdminDashboard() {
                   <button className="admin-save-button" type="submit" disabled={!dirty || busy || uploadingResume}>{busy ? "SAVING…" : "SAVE CHANGES  ↗"}</button>
                 </div>
               </form>
+              {selected === "projects" && (
+                <AdminProjectMedia
+                  projects={content.projects}
+                  disabled={dirty || busy}
+                  onContentUpdated={updateAfterProjectMedia}
+                />
+              )}
             </section>
           ) : (
             <p className="admin-loading">Loading your content…</p>

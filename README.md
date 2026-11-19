@@ -52,6 +52,12 @@ dropping or selecting a PDF (up to 10 MB). Use **Save changes** or `Ctrl+S` to
 publish content edits. Admin routes are excluded from search indexing and protected by
 an HTTP-only, strict same-site session cookie.
 
+In **Admin → Projects**, each non-confidential project has a cover image and
+up to eight screenshots. Upload JPEG, PNG, or WebP images up to 4 MB each;
+replace or remove images there. Covers appear on project cards and detail pages,
+and screenshots appear in each project's screenshot gallery. Projects marked
+confidential stay redacted and cannot accept uploaded images.
+
 For local development without MongoDB, content is stored in
 `data/content.json`, messages in `data/messages.json`, and the résumé PDF at
 `public/resume.pdf`; the `PORTFOLIO_*_FILE` variables can override those paths.
@@ -81,8 +87,10 @@ to save to its temporary filesystem when MongoDB is missing.
    backups and must be retained separately.
 
 MongoDB stores the résumé as binary data in a separate asset document; the
-current 10 MB upload limit is within MongoDB's document size limit. Back up
-your Atlas database as well as downloading portfolio backups regularly.
+current 10 MB upload limit is within MongoDB's document size limit. Project
+images are stored as individual binary documents in `project_media`; on local
+development without MongoDB, they are stored under `data/project-media`.
+Back up your Atlas database as well as downloading portfolio backups regularly.
 
 ### Required credentials
 

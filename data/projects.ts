@@ -19,6 +19,8 @@ export type Project = {
   confidential?: boolean;
   live?: string;
   github?: string;
+  coverImage?: string;
+  screenshots?: string[];
   visual: string;
 };
 
